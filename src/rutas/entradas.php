@@ -5,10 +5,16 @@ use \Psr\Http\Message\ResponseInterface as Response;
 
 $app = new \Slim\App;
 
-
-//GET ALL PRODUCTS
+//Con esto optenemos o consultamos todas las entradas de la tabla entradas
+//http://localhost/back-optica/public/entradas/api/entradas
 
 $app->get('/api/entradas', function (Request $request, Response $response) {
+
+    $numero_factura = $request->getAttribute('numero_factura');
+    
+    if ($numero_factura) {
+        # code...
+    }
 
     $sql =  "SELECT * FROM entradas";
 
@@ -21,7 +27,7 @@ $app->get('/api/entradas', function (Request $request, Response $response) {
             $productos = $resultado->fetchAll(PDO::FETCH_ASSOC);
             echo json_encode($productos);
         } else {
-            echo json_encode("no existen productos");
+            echo json_encode("No hay entradas creadas");
         }
     } catch (PDOException $error) {
 
@@ -34,15 +40,14 @@ $app->get('/api/entradas', function (Request $request, Response $response) {
 });
 
 
+//con esto optenemos la entrada segun el numero de factura
+//http://localhost/back-optica/public/entradas/api/entradas/co123
 
-//GET ALL BY ID
+$app->get('/api/entradas/{numero_factura}', function (Request $request, Response $response) {
 
+    $numero_factura = $request->getAttribute('numero_factura');
 
-$app->get('/api/productos/id={id}', function (Request $request, Response $response) {
-
-    $id = $request->getAttribute('id');
-
-    $sql =  "SELECT * FROM productos where id = '$id' ";
+    $sql =  "SELECT * FROM entradas where numero_factura = '$numero_factura'";
 
     try {
 
@@ -50,10 +55,10 @@ $app->get('/api/productos/id={id}', function (Request $request, Response $respon
         $query = $cnx->Conectar();
         $resultado = $query->query($sql);
         if ($resultado->rowCount() > 0) {
-            $productos = $resultado->fetch(PDO::FETCH_ASSOC);
+            $productos = $resultado->fetchAll(PDO::FETCH_ASSOC);
             echo json_encode($productos);
         } else {
-            echo json_encode("no existen productos con este ID");
+            echo json_encode("No hay entradas creadas con este número de factura");
         }
     } catch (PDOException $error) {
 
@@ -64,66 +69,41 @@ $app->get('/api/productos/id={id}', function (Request $request, Response $respon
         return json_encode($errores);
     }
 });
-
-
-//GET PRODUCT BY CATEGORY
-
-$app->get('/api/productos/category={category}', function (Request $request, Response $response) {
-
-    $categoria = $request->getAttribute('category');
-
-    $sql =  "SELECT * FROM productos where categoria = '$categoria' ";
-
-    try {
-
-        $cnx = new Conexion();
-        $query = $cnx->Conectar();
-        $resultado = $query->query($sql);
-        if ($resultado->rowCount() > 0) {
-            $productos = $resultado->fetch(PDO::FETCH_ASSOC);
-            echo json_encode($productos);
-        } else {
-            echo json_encode("no existen productos con esta categoria");
-        }
-    } catch (PDOException $error) {
-
-        $errores =  array(
-            "text" => $error->getMessage()
-        );
-
-        return json_encode($errores);
-    }
-});
-
 
 //ADD PRODUCT
+//http://localhost/back-optica/public/entradas/api/entradas/crear_entrada
+// Content-type: application/json
+// {
+//     "fecha_entrada": "1991-02-11",
+//     "fk_id_sede": 1,
+//     "numero_factura": "CO123",
+//     "fk_id_proveedores": 1
+// }
 
-$app->post('/api/productos/addProduct', function (Request $request, Response $response) {
+$app->post('/api/entradas/crear_entrada', function (Request $request, Response $response) {
 
-    $nombre = $request->getParam('nombre');
-    $descripcion = $request->getParam('descripcion');
-    $imagen = $request->getParam('imagen');
-    $stock = $request->getParam('stock');
+    $fecha_entrada = $request->getParam('fecha_entrada');
+    $fk_id_sede = $request->getParam('fk_id_sede');
+    $numero_factura = $request->getParam('numero_factura');
+    $fk_id_proveedores = $request->getParam('fk_id_proveedores');
 
-
-
-    $sql =  "INSERT INTO productos (nombre,descripcion,imagen,stock)
-     VALUES (:nombre,:descripcion,:imagen,:stock) ";
+    $sql =  "INSERT INTO entradas (id_entrada, fecha_entrada, fk_id_sede, numero_factura, fk_id_proveedores)
+     VALUES (NULL,:fecha_entrada,:fk_id_sede,:numero_factura,:fk_id_proveedores)";
 
     try {
 
         $cnx = new Conexion();
         $query = $cnx->Conectar();
         $resultado = $query->prepare($sql);
-        $resultado->bindParam(':nombre', $nombre);
-        $resultado->bindParam(':descripcion', $descripcion);
-        $resultado->bindParam(':imagen', $imagen);
-        $resultado->bindParam(':stock', $stock);
+        $resultado->bindParam(':fecha_entrada', $fecha_entrada);
+        $resultado->bindParam(':fk_id_sede', $fk_id_sede);
+        $resultado->bindParam(':numero_factura', $numero_factura);
+        $resultado->bindParam(':fk_id_proveedores', $fk_id_proveedores);
 
         if ($resultado->execute()) {
-            echo json_encode("agregado correctamente");
+            echo json_encode("Entrada creada con exito");
         } else {
-            echo json_encode("no fue agregado");
+            echo json_encode("Hubo un error al crear la entrada intenta de nuevo");
         }
     } catch (PDOException $error) {
 
@@ -137,38 +117,45 @@ $app->post('/api/productos/addProduct', function (Request $request, Response $re
 
 
 //UPDATE PRODUCT
+//http://localhost/back-optica/public/entradas/api/entradas/update/CO123
+// Content-type: application/json
+// {
+//     "fecha_entrada": "2021-10-25",
+//     "fk_id_sede": 1,
+//     "numero_factura": "CO123",
+//     "fk_id_proveedores": 1
+// }
 
-$app->put('/api/productos/update', function (Request $request, Response $response) {
+$app->put('/api/entradas/update/{numero_factura}', function (Request $request, Response $response) {
 
-    $id = $request->getParam('id');
-    $nombre = $request->getParam('nombre');
-    $descripcion = $request->getParam('descripcion');
-    $imagen = $request->getParam('imagen');
-    $stock = $request->getParam('stock');
-
+    $fecha_entrada = $request->getParam('fecha_entrada');
+    $fk_id_sede = $request->getParam('fk_id_sede');
+    $numero_factura = $request->getParam('numero_factura');
+    $fk_id_proveedores = $request->getParam('fk_id_proveedores');
 
 
-    $sql =  "UPDATE productos SET
-    nombre= :nombre,
-    descripcion = :descripcion,
-    imagen =  :imagen,
-    stock = :stock  WHERE id = :id ";
+
+    $sql =  "UPDATE entradas SET
+    id_entrada = NULL,
+    fecha_entrada = :fecha_entrada,
+    fk_id_sede = :fk_id_sede,
+    numero_factura =  :numero_factura,
+    fk_id_proveedores = :fk_id_proveedores  WHERE numero_factura = :numero_factura ";
 
     try {
 
         $cnx = new Conexion();
         $query = $cnx->Conectar();
         $resultado = $query->prepare($sql);
-        $resultado->bindParam(':nombre', $nombre);
-        $resultado->bindParam(':descripcion', $descripcion);
-        $resultado->bindParam(':imagen', $imagen);
-        $resultado->bindParam(':stock', $stock);
-        $resultado->bindParam(':id', $id);
+        $resultado->bindParam(':fecha_entrada', $fecha_entrada);
+        $resultado->bindParam(':fk_id_sede', $fk_id_sede);
+        $resultado->bindParam(':numero_factura', $numero_factura);
+        $resultado->bindParam(':fk_id_proveedores', $fk_id_proveedores);
 
         if ($resultado->execute()) {
-            echo json_encode("actualizado correctamente");
+            echo json_encode("Entrada actualizada con exito");
         } else {
-            echo json_encode("no fue actualizado");
+            echo json_encode("Hubo un error al actualizar la entrada intenta de nuevo");
         }
     } catch (PDOException $error) {
 
@@ -185,25 +172,24 @@ $app->put('/api/productos/update', function (Request $request, Response $respons
 //DELETE PRODUCT
 
 
-$app->delete('/api/productos/delete/id={id}', function (Request $request, Response $response) {
+$app->delete('/api/entradas/delete/{numero_factura}', function (Request $request, Response $response) {
 
-    $id = $request->getAttribute('id');
+    $numero_factura = $request->getParam('numero_factura');
+echo($numero_factura);
 
-
-
-    $sql =  "DELETE FROM productos where id = :id";
-
+    $sql =  "DELETE FROM entradas where numero_factura = :numero_factura";
+	
     try {
 
         $cnx = new Conexion();
         $query = $cnx->Conectar();
         $resultado = $query->prepare($sql);
-        $resultado->bindParam(':id', $id);
+        $resultado->bindParam(':numero_factura', $numero_factura);
 
         if ($resultado->execute()) {
-            echo json_encode("eliminado correctamente");
+            echo json_encode("Entrada eliminada correctamente");
         } else {
-            echo json_encode("no fue eliminado");
+            echo json_encode("Hubo un error, la entrada no se pudo eliminar intenta nuevamente");
         }
     } catch (PDOException $error) {
 

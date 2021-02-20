@@ -10,9 +10,6 @@ require '../../src/config/config.php';
 $app = new \Slim\App;
 
 
-require '../../src/rutas/entradas.php';
-
-
-
+require '../../src/rutas/citas.php';
 
 $app->run();

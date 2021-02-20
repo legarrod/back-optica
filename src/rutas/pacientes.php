@@ -55,6 +55,7 @@ $app->get('/api/pacientes/{id}', function (Request $request, Response $response)
 
 //POST CREAR UN NUEVO PACIENTE
 //FORMATO PARA ENVIAR INFORMACION A LA BD
+//http://localhost/back-optica/public/apipacientes/api/pacientes/nuevo
 // Content-type: application/json
 // {
 //     "ciudad": 2,
