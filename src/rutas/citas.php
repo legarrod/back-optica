@@ -27,6 +27,54 @@ $app->get('/api/citas', function (Request $request, Response $response) {
     }
 });
 
+//Obtener resumen de citas para cards de citas inicial 
+$app->get('/api/citas_cards', function (Request $request, Response $response) {
+
+    $sql1 =  "SELECT citas_pacientes.fecha_creacion, citas_pacientes.fecha_cita, pacientes.nombre, pacientes.apellidos FROM citas_pacientes
+    INNER JOIN pacientes
+    ON citas_pacientes.fk_id_paciente = pacientes.id";
+
+    try {
+
+        $cnx = new Conexion();
+        $query = $cnx->Conectar();
+        $resultado1 = $query->query($sql1);
+        $writes = $resultado1->fetchAll(PDO::FETCH_OBJ);
+        $resultadosgenerales = array($writes);
+        echo json_encode($resultadosgenerales);
+    } catch (PDOException $error) {
+        $errores =  array(
+            "text" => $error->getMessage()
+        );
+        return json_encode($errores);
+    }
+});
+
+//Obtener informacion de una cita por la codigo del paciente
+$app->get('/api/citaporpaciente/{id_paciente}', function (Request $request, Response $response) {
+
+    $id_paciente = $request->getAttribute('id_paciente');
+    $sql1 =  "SELECT * FROM citas_pacientes
+    INNER JOIN pacientes
+    ON citas_pacientes.fk_id_paciente = pacientes.id
+    where fk_id_paciente = $id_paciente";
+
+    try {
+
+        $cnx = new Conexion();
+        $query = $cnx->Conectar();
+        $resultado1 = $query->query($sql1);
+        $writes = $resultado1->fetchAll(PDO::FETCH_OBJ);
+        $resultadosgenerales = array($writes);
+        echo json_encode($resultadosgenerales);
+    } catch (PDOException $error) {
+        $errores =  array(
+            "text" => $error->getMessage()
+        );
+        return json_encode($errores);
+    }
+});
+
 //GET obtener todas las citas por fecha
 $app->get('/api/citas/{fecha}', function (Request $request, Response $response) {
 
