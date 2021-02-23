@@ -9,7 +9,9 @@ $app = new \Slim\App;
 //http://localhost/back-optica/public/citas/api/citas
 $app->get('/api/citas', function (Request $request, Response $response) {
 
-    $sql1 =  "SELECT * FROM citas_pacientes";
+    $sql1 =  "SELECT * FROM citas_pacientes
+    INNER JOIN pacientes
+    ON citas_pacientes.fk_id_paciente = pacientes.id";
 
     try {
 
@@ -30,7 +32,7 @@ $app->get('/api/citas', function (Request $request, Response $response) {
 //Obtener resumen de citas para cards de citas inicial 
 $app->get('/api/citas_cards', function (Request $request, Response $response) {
 
-    $sql1 =  "SELECT citas_pacientes.fecha_creacion, citas_pacientes.fecha_cita, pacientes.nombre, pacientes.apellidos FROM citas_pacientes
+    $sql1 =  "SELECT citas_pacientes.id_cita_paciente, citas_pacientes.fecha_creacion, citas_pacientes.fecha_cita, pacientes.nombre, pacientes.apellidos FROM citas_pacientes
     INNER JOIN pacientes
     ON citas_pacientes.fk_id_paciente = pacientes.id";
 
@@ -57,7 +59,7 @@ $app->get('/api/citaporpaciente/{id_paciente}', function (Request $request, Resp
     $sql1 =  "SELECT * FROM citas_pacientes
     INNER JOIN pacientes
     ON citas_pacientes.fk_id_paciente = pacientes.id
-    where fk_id_paciente = $id_paciente";
+    where id_cita_paciente = $id_paciente";
 
     try {
 
