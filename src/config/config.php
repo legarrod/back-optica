@@ -23,5 +23,25 @@ class Conexion
     }
 }
 
+function try_catch_wrapper(Closure $closure, $response)
+{
+    $statusCode = 200;
 
+    try {
+
+        $respuesta = [
+            "status_code" => $statusCode,
+            "data" => $closure()
+        ];
+
+    } catch (\Exception $exception) {
+        $statusCode = 500;
+        $respuesta = [
+            "status_code" => $statusCode,
+            "message" => $exception->getMessage()
+        ];
+    }
+
+    return $response->withJson($respuesta , $statusCode, JSON_PRETTY_PRINT);    
+}
 ?>

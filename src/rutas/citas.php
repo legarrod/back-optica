@@ -29,6 +29,42 @@ $app->get('/api/citas', function (Request $request, Response $response) {
     }
 });
 
+//obtener citas por estado
+$app->get('/api/citasestado/{id_estado}', function (Request $request, Response $response) {
+
+    return try_catch_wrapper(function() use ($request){
+        //throw new Exception('malo');
+        $id_estado = $request->getAttribute('id_estado');
+        $sql =  "SELECT citas_pacientes.id_cita_paciente, citas_pacientes.fecha_creacion, citas_pacientes.fecha_cita, citas_pacientes.hora, pacientes.nombre, pacientes.apellidos FROM citas_pacientes
+        INNER JOIN pacientes
+        ON citas_pacientes.fk_id_paciente = pacientes.id
+        where fk_id_estado = $id_estado
+        ORDER BY  citas_pacientes.fecha_cita, citas_pacientes.hora ASC";
+        $dbConexion = new DBConexion(new Conexion());
+        $resultado = $dbConexion->executeQuery($sql);
+        return $resultado ?: [];
+    }, $response);
+    
+});
+
+//Obtener citas por fecha
+$app->get('/api/citasporfecha/{fecha}', function (Request $request, Response $response) {
+
+    return try_catch_wrapper(function() use ($request){
+        //throw new Exception('malo');
+        $fecha = $request->getAttribute('fecha');
+        $sql =  "SELECT citas_pacientes.id_cita_paciente, citas_pacientes.fecha_creacion, citas_pacientes.fecha_cita, citas_pacientes.hora, pacientes.nombre, pacientes.apellidos FROM citas_pacientes
+        INNER JOIN pacientes
+        ON citas_pacientes.fk_id_paciente = pacientes.id
+        where fecha_cita = '{$fecha}'
+        ORDER BY citas_pacientes.hora ASC";
+        $dbConexion = new DBConexion(new Conexion());
+        $resultado = $dbConexion->executeQuery($sql);
+        return $resultado ?: [];
+    }, $response);
+    
+});
+
 //Obtener resumen de citas para cards de citas inicial 
 $app->get('/api/citas_cards', function (Request $request, Response $response) {
 
@@ -55,26 +91,18 @@ $app->get('/api/citas_cards', function (Request $request, Response $response) {
 //Obtener informacion de una cita por la codigo del paciente
 $app->get('/api/citaporpaciente/{id_paciente}', function (Request $request, Response $response) {
 
-    $id_paciente = $request->getAttribute('id_paciente');
-    $sql1 =  "SELECT * FROM citas_pacientes
-    INNER JOIN pacientes
-    ON citas_pacientes.fk_id_paciente = pacientes.id
-    where id_cita_paciente = $id_paciente";
-
-    try {
-
-        $cnx = new Conexion();
-        $query = $cnx->Conectar();
-        $resultado1 = $query->query($sql1);
-        $writes = $resultado1->fetchAll(PDO::FETCH_OBJ);
-        $resultadosgenerales = array($writes);
-        echo json_encode($resultadosgenerales);
-    } catch (PDOException $error) {
-        $errores =  array(
-            "text" => $error->getMessage()
-        );
-        return json_encode($errores);
-    }
+    return try_catch_wrapper(function() use ($request){
+        //throw new Exception('malo');
+        $id_paciente = $request->getAttribute('id_paciente');
+        $sql =  "SELECT * FROM citas_pacientes
+        INNER JOIN pacientes
+        ON citas_pacientes.fk_id_paciente = pacientes.id
+        where id_cita_paciente = $id_paciente";
+        $dbConexion = new DBConexion(new Conexion());
+        $resultado = $dbConexion->executeQuery($sql);
+        return $resultado ?: [];
+    }, $response);
+    
 });
 
 //GET obtener todas las citas por fecha
@@ -140,6 +168,120 @@ $app->get('/api/citas/{fecha}', function (Request $request, Response $response) 
 // }
 $app->post('/api/citas/crear_cita', function (Request $request, Response $response) {
 
+
+    return try_catch_wrapper(function() use ($request){
+        //throw new Exception('malo');
+        $sql =  $sql = "INSERT INTO citas_pacientes (id_cita_paciente, fk_id_paciente, nombre_doctor, fk_id_sede, fk_id_estado, fecha_creacion, fecha_cita, hora, anamnesis, biomicrodcopia, od_rx_uso, oi_rx_uso, oi_ap, oi_af, od_ap, od_af, od_avvlsc, od_avvpsc, od_avccvt, od_avccvp, od_refraccion, od_rx_final, oi_avvlsc, oi_avvpsc, oi_avccvt, oi_avccvp, oi_refraccion, oi_rx_final, valor_cita, observaciones) VALUES 
+        (NULL,:fk_id_paciente,:nombre_doctor,:fk_id_sede,:fk_id_estado,:fecha_creacion,:fecha_cita, :hora, :anamnesis,:biomicrodcopia,:od_rx_uso,:oi_rx_uso,:oi_ap,:oi_af,:od_ap,:od_af,:od_avvlsc,:od_avvpsc,:od_avccvt,:od_avccvp,:od_refraccion,:od_rx_final,:oi_avvlsc,:oi_avvpsc,:oi_avccvt,:oi_avccvp,:oi_refraccion,:oi_rx_final,:valor_cita,:observaciones)";
+        $dbConexion = new DBConexion(new Conexion());
+       $params = $request->getParams(); 
+       
+        $resultado = $dbConexion->executePrepare($sql, $params);
+        return $resultado ?: [];
+    }, $response);
+
+
+
+    // $fk_id_paciente = $request->getParam('fk_id_paciente');
+    // $nombre_doctor = $request->getParam('nombre_doctor');
+    // $fk_id_sede = $request->getParam('fk_id_sede');//no debe estar nulo
+    // $fk_id_estado = $request->getParam('fk_id_estado');
+    // $fecha_creacion = $request->getParam('fecha_creacion');
+    // $fecha_cita = $request->getParam('fecha_cita');
+    // $anamnesis = $request->getParam('anamnesis');
+    // $biomicrodcopia = $request->getParam('biomicrodcopia');
+    // $od_rx_uso = $request->getParam('od_rx_uso');
+    // $oi_rx_uso = $request->getParam('oi_rx_uso');
+    // $oi_ap = $request->getParam('oi_ap');
+    // $oi_af = $request->getParam('oi_af');
+    // $od_ap = $request->getParam('od_ap');
+    // $od_af = $request->getParam('od_af');
+    // $od_avvlsc = $request->getParam('od_avvlsc');
+    // $od_avvpsc = $request->getParam('od_avvpsc');
+    // $od_avccvt = $request->getParam('od_avccvt');
+    // $od_avccvp = $request->getParam('od_avccvp');
+    // $od_refraccion = $request->getParam('od_refraccion');
+    // $od_rx_final = $request->getParam('od_rx_final');
+    // $oi_avvlsc = $request->getParam('oi_avvlsc');
+    // $oi_avvpsc = $request->getParam('oi_avvpsc');
+    // $oi_avccvt = $request->getParam('oi_avccvt');
+    // $oi_avccvp = $request->getParam('oi_avccvp');
+    // $oi_refraccion = $request->getParam('oi_refraccion');
+    // $oi_rx_final = $request->getParam('oi_rx_final');
+    // $valor_cita = $request->getParam('valor_cita');
+    // $observaciones = $request->getParam('observaciones');
+
+    //  $sql = "INSERT INTO citas_pacientes (id_cita_paciente, fk_id_paciente, nombre_doctor, fk_id_sede, fk_id_estado, fecha_creacion, fecha_cita, anamnesis, biomicrodcopia, od_rx_uso, oi_rx_uso, oi_ap, oi_af, od_ap, od_af, od_avvlsc, od_avvpsc, od_avccvt, od_avccvp, od_refraccion, od_rx_final, oi_avvlsc, oi_avvpsc, oi_avccvt, oi_avccvp, oi_refraccion, oi_rx_final, valor_cita, observaciones) VALUES 
+    //         (NULL,:fk_id_paciente,:nombre_doctor,:fk_id_sede,:fk_id_estado,:fecha_creacion,:fecha_cita,:anamnesis,:biomicrodcopia,:od_rx_uso,:oi_rx_uso,:oi_ap,:oi_af,:od_ap,:od_af,:od_avvlsc,:od_avvpsc,:od_avccvt,:od_avccvp,:od_refraccion,:od_rx_final,:oi_avvlsc,:oi_avvpsc,:oi_avccvt,:oi_avccvp,:oi_refraccion,:oi_rx_final,:valor_cita,:observaciones)";
+
+    // try {
+
+    //     $cnx = new Conexion();
+    //     $query = $cnx->Conectar();
+    //     $resultado = $query->prepare($sql);
+    //     $resultado->bindParam(':fk_id_paciente', $fk_id_paciente);
+    //     $resultado->bindParam(':nombre_doctor', $nombre_doctor);
+    //     $resultado->bindParam(':fk_id_sede', $fk_id_sede);
+    //     $resultado->bindParam(':fk_id_estado', $fk_id_estado);
+    //     $resultado->bindParam(':fecha_creacion', $fecha_creacion);
+    //     $resultado->bindParam(':fecha_cita', $fecha_cita);
+    //     $resultado->bindParam(':anamnesis', $anamnesis);
+    //     $resultado->bindParam(':biomicrodcopia', $biomicrodcopia);
+    //     $resultado->bindParam(':od_rx_uso', $od_rx_uso);
+    //     $resultado->bindParam(':oi_rx_uso', $oi_rx_uso);
+    //     $resultado->bindParam(':oi_ap', $oi_ap);
+    //     $resultado->bindParam(':oi_af', $oi_af);
+    //     $resultado->bindParam(':od_ap', $od_ap);
+    //     $resultado->bindParam(':od_af', $od_af);
+    //     $resultado->bindParam(':od_avvlsc', $od_avvlsc);
+    //     $resultado->bindParam(':od_avvpsc', $od_avvpsc);
+    //     $resultado->bindParam(':od_avccvt', $od_avccvt);
+    //     $resultado->bindParam(':od_avccvp', $od_avccvp);
+    //     $resultado->bindParam(':od_refraccion', $od_refraccion);
+    //     $resultado->bindParam(':od_rx_final', $od_rx_final);
+    //     $resultado->bindParam(':oi_avvlsc', $oi_avvlsc);
+    //     $resultado->bindParam(':oi_avvpsc', $oi_avvpsc);
+    //     $resultado->bindParam(':oi_avccvt', $oi_avccvt);
+    //     $resultado->bindParam(':oi_avccvp', $oi_avccvp);
+    //     $resultado->bindParam(':oi_refraccion', $oi_refraccion);
+    //     $resultado->bindParam(':oi_rx_final', $oi_rx_final);
+    //     $resultado->bindParam(':valor_cita', $valor_cita);
+    //     $resultado->bindParam(':observaciones', $observaciones);
+        
+
+    //     if ($resultado->execute()) {
+    //         echo json_encode("Paciente agregado correctamente");
+    //     } else {
+    //         echo json_encode("Hubo un error intenta de nuevo");
+    //     }
+    // } catch (PDOException $error) {
+
+    //     $errores =  array(
+    //         "text" => $error->getMessage()
+    //     );
+
+    //     return json_encode($errores);
+    // }
+});
+
+//PUT PARA ACTUALIZAR UN REGISTRO
+// Content-type: application/json
+// {
+//     "ciudad": 2,
+//     "nombre": "Jose Maria",
+//     "apellidos": "Cordoba Montes",
+//     "fecha_nacimiento": "1991-02-11",
+//     "celular": "3258965412",
+//     "fecha_registro": "2021-01-10",
+//     "direccion": "Ya no vive",
+//     "ocupacion": "Maestro de obra",
+//     "cedula": "13452",
+//     "foto": ""
+// }
+
+$app->put('/api/citas/update/', function (Request $request, Response $response) {
+
+    $id_cita_paciente = $request->getParam('id_cita_paciente');
     $fk_id_paciente = $request->getParam('fk_id_paciente');
     $nombre_doctor = $request->getParam('nombre_doctor');
     $fk_id_sede = $request->getParam('fk_id_sede');//no debe estar nulo
@@ -168,18 +310,47 @@ $app->post('/api/citas/crear_cita', function (Request $request, Response $respon
     $oi_rx_final = $request->getParam('oi_rx_final');
     $valor_cita = $request->getParam('valor_cita');
     $observaciones = $request->getParam('observaciones');
+   
 
-     $sql = "INSERT INTO citas_pacientes (id_cita_paciente, fk_id_paciente, nombre_doctor, fk_id_sede, fk_id_estado, fecha_creacion, fecha_cita, anamnesis, biomicrodcopia, od_rx_uso, oi_rx_uso, oi_ap, oi_af, od_ap, od_af, od_avvlsc, od_avvpsc, od_avccvt, od_avccvp, od_refraccion, od_rx_final, oi_avvlsc, oi_avvpsc, oi_avccvt, oi_avccvp, oi_refraccion, oi_rx_final, valor_cita, observaciones) VALUES 
-            (NULL,:fk_id_paciente,:nombre_doctor,:fk_id_sede,:fk_id_estado,:fecha_creacion,:fecha_cita,:anamnesis,:biomicrodcopia,:od_rx_uso,:oi_rx_uso,:oi_ap,:oi_af,:od_ap,:od_af,:od_avvlsc,:od_avvpsc,:od_avccvt,:od_avccvp,:od_refraccion,:od_rx_final,:oi_avvlsc,:oi_avvpsc,:oi_avccvt,:oi_avccvp,:oi_refraccion,:oi_rx_final,:valor_cita,:observaciones)";
+   $sql_prueba = "UPDATE `citas_pacientes` SET 
+    `fk_id_paciente`    = :fk_id_paciente,
+    `nombre_doctor`     = :nombre_doctor,
+    `fk_id_sede`        = :fk_id_sede,
+    `fk_id_estado`      = :fk_id_estado,
+    `fecha_creacion`    = :fecha_creacion,
+    `fecha_cita`        = :fecha_cita,
+    `anamnesis`         = :anamnesis,
+    `biomicrodcopia`    = :biomicrodcopia,
+    `od_rx_uso`         = :od_rx_uso,
+    `oi_rx_uso`         = :oi_rx_uso,
+    `oi_ap`             = :oi_ap,
+    `oi_af`             = :oi_af,
+    `od_ap`             = :od_ap,
+    `od_af`             = :od_af,
+    `od_avvlsc`         = :od_avvlsc,
+    `od_avvpsc`         = :od_avvpsc,
+    `od_avccvt`         = :od_avccvt,
+    `od_avccvp`         = :od_avccvp,
+    `od_refraccion`     = :od_refraccion,
+    `od_rx_final`       = :od_rx_final,
+    `oi_avvlsc`         = :oi_avvlsc,
+    `oi_avvpsc`         = :oi_avvpsc,
+    `oi_avccvt`         = :oi_avccvt,
+    `oi_avccvp`         = :oi_avccvp,
+    `oi_refraccion`     = :oi_refraccion,
+    `oi_rx_final`       = :oi_rx_final,
+    `valor_cita`        = :valor_cita,
+    `observaciones`        = :observaciones
+    WHERE id_cita_paciente = :id_cita_paciente";
 
     try {
-
         $cnx = new Conexion();
         $query = $cnx->Conectar();
-        $resultado = $query->prepare($sql);
+        $resultado = $query->prepare($sql_prueba);
         $resultado->bindParam(':fk_id_paciente', $fk_id_paciente);
         $resultado->bindParam(':nombre_doctor', $nombre_doctor);
         $resultado->bindParam(':fk_id_sede', $fk_id_sede);
+        $resultado->bindParam(':id_cita_paciente', $id_cita_paciente);
         $resultado->bindParam(':fk_id_estado', $fk_id_estado);
         $resultado->bindParam(':fecha_creacion', $fecha_creacion);
         $resultado->bindParam(':fecha_cita', $fecha_cita);
@@ -206,149 +377,22 @@ $app->post('/api/citas/crear_cita', function (Request $request, Response $respon
         $resultado->bindParam(':valor_cita', $valor_cita);
         $resultado->bindParam(':observaciones', $observaciones);
         
-
         if ($resultado->execute()) {
-            echo json_encode("Paciente agregado correctamente");
-        } else {
-            echo json_encode("Hubo un error intenta de nuevo");
-        }
-    } catch (PDOException $error) {
-
-        $errores =  array(
-            "text" => $error->getMessage()
-        );
-
-        return json_encode($errores);
-    }
-});
-
-//PUT PARA ACTUALIZAR UN REGISTRO
-// Content-type: application/json
-// {
-//     "ciudad": 2,
-//     "nombre": "Jose Maria",
-//     "apellidos": "Cordoba Montes",
-//     "fecha_nacimiento": "1991-02-11",
-//     "celular": "3258965412",
-//     "fecha_registro": "2021-01-10",
-//     "direccion": "Ya no vive",
-//     "ocupacion": "Maestro de obra",
-//     "cedula": "13452",
-//     "foto": ""
-// }
-
-$app->put('/api/citas/update/{id_cita_paciente}', function (Request $request, Response $response) {
-
-    $id_cita_paciente = $request->getAttribute('id_cita_paciente');
-    $fk_id_paciente = $request->getParam('fk_id_paciente');
-    $nombre_doctor = $request->getParam('nombre_doctor');
-    $fk_id_sede = $request->getParam('fk_id_sede');//no debe estar nulo
-    $fk_id_estado = $request->getParam('fk_id_estado');
-    $fecha_creacion = $request->getParam('fecha_creacion');
-    $fecha_cita = $request->getParam('fecha_cita');
-    $anamnesis = $request->getParam('anamnesis');
-    $biomicrodcopia = $request->getParam('biomicrodcopia');
-    $od_rx_uso = $request->getParam('od_rx_uso');
-    $oi_rx_uso = $request->getParam('oi_rx_uso');
-    $oi_ap = $request->getParam('oi_ap');
-    $oi_af = $request->getParam('oi_af');
-    $od_ap = $request->getParam('od_ap');
-    $od_af = $request->getParam('od_af');
-    $od_avvlsc = $request->getParam('od_avvlsc');
-    $od_avvpsc = $request->getParam('od_avvpsc');
-    $od_avccvt = $request->getParam('od_avccvt');
-    $od_avccvp = $request->getParam('od_avccvp');
-    $od_refraccion = $request->getParam('od_refraccion');
-    $od_rx_final = $request->getParam('od_rx_final');
-    $oi_avvlsc = $request->getParam('oi_avvlsc');
-    $oi_avvpsc = $request->getParam('oi_avvpsc');
-    $oi_avccvt = $request->getParam('oi_avccvt');
-    $oi_avccvp = $request->getParam('oi_avccvp');
-    $oi_refraccion = $request->getParam('oi_refraccion');
-    $oi_rx_final = $request->getParam('oi_rx_final');
-    $valor_cita = $request->getParam('valor_cita');
-    $observaciones = $request->getParam('observaciones');
-
-     $sql = "UPDATE citas_pacientes SET 
-        id_cita_paciente = :id_cita_paciente,
-        fk_id_paciente = :fk_id_paciente,
-        nombre_doctor = :nombre_doctor,
-        fk_id_sede = :fk_id_sede,
-        fk_id_estado = :fk_id_estado,
-        fecha_creacion = :fecha_creacion,
-        fecha_cita = :fecha_cita,
-        anamnesis = :anamnesis,
-        biomicrodcopia = :biomicrodcopia,
-        od_rx_uso = :od_rx_uso,
-        oi_rx_uso = :oi_rx_uso,
-        oi_ap = :oi_ap,
-        oi_af = :oi_af,
-        od_ap = :od_ap,
-        od_af = :od_af,
-        od_avvlsc = :od_avvlsc,
-        od_avvpsc = :od_avvpsc,
-        od_avccvt = :od_avccvt,
-        od_avccvp = :od_avccvp,
-        od_refraccion = :od_refraccion,
-        od_rx_final = :od_rx_final,
-        oi_avvlsc = :oi_avvlsc,
-        oi_avvpsc = :oi_avvpsc,
-        oi_avccvt = :oi_avccvt,
-        oi_avccvp = :oi_avccvp,
-        oi_refraccion = :oi_refraccion,
-        oi_rx_final = :oi_rx_final,
-        valor_cita = :valor_cita,
-        observaciones = :observaciones WHERE id_cita_paciente = $id_cita_paciente";
-
-
-    try {
-
-        $cnx = new Conexion();
-        $query = $cnx->Conectar();
-        $resultado = $query->prepare($sql);
-
-        $resultado->bindParam(':fk_id_paciente', $fk_id_paciente);
-        $resultado->bindParam(':nombre_doctor', $nombre_doctor);
-        $resultado->bindParam(':fk_id_sede', $fk_id_sede);
-        $resultado->bindParam(':fk_id_estado', $fk_id_estado);
-        $resultado->bindParam(':fecha_creacion', $fecha_creacion);
-        $resultado->bindParam(':fecha_cita', $fecha_cita);
-        $resultado->bindParam(':anamnesis', $anamnesis);
-        $resultado->bindParam(':biomicrodcopia', $biomicrodcopia);
-        $resultado->bindParam(':od_rx_uso', $od_rx_uso);
-        $resultado->bindParam(':oi_rx_uso', $oi_rx_uso);
-        $resultado->bindParam(':oi_ap', $oi_ap);
-        $resultado->bindParam(':oi_af', $oi_af);
-        $resultado->bindParam(':od_ap', $od_ap);
-        $resultado->bindParam(':od_af', $od_af);
-        $resultado->bindParam(':od_avvlsc', $od_avvlsc);
-        $resultado->bindParam(':od_avvpsc', $od_avvpsc);
-        $resultado->bindParam(':od_avccvt', $od_avccvt);
-        $resultado->bindParam(':od_avccvp', $od_avccvp);
-        $resultado->bindParam(':od_refraccion', $od_refraccion);
-        $resultado->bindParam(':od_rx_final', $od_rx_final);
-        $resultado->bindParam(':oi_avvlsc', $oi_avvlsc);
-        $resultado->bindParam(':oi_avvpsc', $oi_avvpsc);
-        $resultado->bindParam(':oi_avccvt', $oi_avccvt);
-        $resultado->bindParam(':oi_avccvp', $oi_avccvp);
-        $resultado->bindParam(':oi_refraccion', $oi_refraccion);
-        $resultado->bindParam(':oi_rx_final', $oi_rx_final);
-        $resultado->bindParam(':valor_cita', $valor_cita);
-        $resultado->bindParam(':observaciones', $observaciones);
-
-        if ($resultado->execute()) {
-            echo json_encode("Cita actualizado correctamente");
+            echo json_encode("Cita actualizada correctamente");
         } else {
             echo json_encode("Hubo un error en la actualizacion intenta de nuevo");
         }
+
+
     } catch (PDOException $error) {
 
         $errores =  array(
             "text" => $error->getMessage()
         );
-
+        $miArray = array($id_cita_paciente, $nombre_doctor, $fk_id_sede, $fk_id_paciente);
         return json_encode($errores);
     }
+    
 });
 
 $app->delete('/api/pacientes/delete/{cedula}', function (Request $request, Response $response) {

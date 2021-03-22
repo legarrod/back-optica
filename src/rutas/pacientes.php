@@ -8,22 +8,13 @@ $app = new \Slim\App;
 //GET TRAE TODOS LOS PACIENTES
 $app->get('/api/pacientes', function (Request $request, Response $response) {
 
-    $sql1 =  "SELECT * FROM pacientes";
-
-    try {
-
-        $cnx = new Conexion();
-        $query = $cnx->Conectar();
-        $resultado1 = $query->query($sql1);
-        $writes = $resultado1->fetchAll(PDO::FETCH_OBJ);
-        $resultadosgenerales = array($writes);
-        echo json_encode($resultadosgenerales);
-    } catch (PDOException $error) {
-        $errores =  array(
-            "text" => $error->getMessage()
-        );
-        return json_encode($errores);
-    }
+    return try_catch_wrapper(function() use ($request){
+        //throw new Exception('malo');
+        $sql =  "SELECT * FROM pacientes INNER JOIN ciudades ON pacientes.ciudad = ciudades.id_ciudad";
+        $dbConexion = new DBConexion(new Conexion());
+        $resultado = $dbConexion->executeQuery($sql);
+        return $resultado ?: [];
+    }, $response);
 });
 
 //GET CONSULTAR PACIENTE POR DOCUMENTO
@@ -41,7 +32,7 @@ $app->get('/api/pacientes/{id}', function (Request $request, Response $response)
             $paciente = $resultado->fetch(PDO::FETCH_ASSOC);
             echo json_encode($paciente);
         } else {
-            echo json_encode("No existen paciente con este ID");
+            echo json_encode("No existen paciente con esta cedula");
         }
     } catch (PDOException $error) {
 
@@ -132,7 +123,7 @@ $app->post('/api/pacientes/nuevo', function (Request $request, Response $respons
 //     "foto": ""
 // }
 
-$app->put('/api/pacientes/update/{cedula}', function (Request $request, Response $response) {
+$app->put('/api/pacientes/update/', function (Request $request, Response $response) {
 
     $ciudad = $request->getParam('ciudad');
     $nombre = $request->getParam('nombre');
@@ -146,13 +137,11 @@ $app->put('/api/pacientes/update/{cedula}', function (Request $request, Response
     $foto = $request->getParam('foto');
 
      $sql = "UPDATE pacientes SET 
-        id = NULL,
         ciudad = :ciudad,
         nombre = :nombre,
         apellidos = :apellidos,
         fecha_nacimiento = :fecha_nacimiento,
         celular = :celular,
-        fecha_registro = :fecha_registro,
         direccion = :direccion,
         ocupacion = :ocupacion,
         cedula = :cedula,
@@ -169,7 +158,6 @@ $app->put('/api/pacientes/update/{cedula}', function (Request $request, Response
         $resultado->bindParam(':apellidos', $apellidos);
         $resultado->bindParam(':fecha_nacimiento', $fecha_nacimiento);
         $resultado->bindParam(':celular', $celular);
-        $resultado->bindParam(':fecha_registro', $fecha_registro);
         $resultado->bindParam(':direccion', $direccion);
         $resultado->bindParam(':ocupacion', $ocupacion);
         $resultado->bindParam(':cedula', $cedula);
