@@ -105,14 +105,13 @@ $app->get('/api/facturacompleta', function (Request $request, Response $response
     return try_catch_wrapper(function() {
         
         //throw new Exception('malo');
-        $sql = <<<EOF
-        SELECT fac.id_factura AS id, pac.cedula AS cedula, fac.numero_factura, fac.estado_factura AS estado, CONCAT(pac.nombre, ' ', pac.apellidos) AS paciente,
+        $sql = "SELECT fac.id_factura AS id, pac.cedula AS cedula, fac.numero_factura, fac.estado_factura AS estado, CONCAT(pac.nombre, ' ', pac.apellidos) AS paciente,
         fac.estado_factura AS estado, fac.valor_factura, (SELECT SUM(valor_abono) FROM abonos WHERE fac.id_factura = fk_id_factura) AS total_abonos,
         fac.valor_factura - (SELECT SUM(valor_abono) FROM abonos WHERE fac.id_factura = fk_id_factura) AS total_deuda, fac.observaciones AS nota
         FROM con_facturas AS fac
         LEFT JOIN pacientes AS pac ON pac.id = fac.cc_usuario 
-        ORDER BY fac.id_factura DESC
-        EOF;
+        ORDER BY fac.id_factura DESC";
+        
         $dbConexion = new DBConexion(new Conexion());
         $resultado = $dbConexion->executeQuery($sql);
         return $resultado ?: [];
@@ -173,87 +172,5 @@ $app->post('/api/facturas/creardetallefactura', function (Request $request, Resp
 });
 
 
-// //UPDATE PRODUCT
-
-// $app->put('/api/productos/update', function (Request $request, Response $response) {
-
-//     $nombre         = $request->getParam('nombre');
-//     $descripcion    = $request->getParam('descripcion');
-//     $imagen         = $request->getParam('imagen');
-//     $codigo         = $request->getParam('codigo');
-//     $idproducto     = $request->getParam('idproducto');
-//     $fk_id_entrada  = $request->getParam('fk_id_entrada');
-
-//     $sql =  "UPDATE inventario SET 
-//                 nombre          = :nombre,
-//                 descripcion     = :descripcion,
-//                 codigo          = :codigo,
-//                 fk_id_entrada   = :fk_id_entrada,
-//                 imagen          = :imagen WHERE idproducto = :idproducto";
-
-//     try {
-
-//         $cnx = new Conexion();
-//         $query = $cnx->Conectar();
-//         $resultado = $query->prepare($sql);
-        
-//         $resultado->bindParam(':nombre',        $nombre);
-//         $resultado->bindParam(':descripcion',   $descripcion);
-//         $resultado->bindParam(':codigo',        $codigo);
-//         $resultado->bindParam(':imagen',        $imagen);
-//         $resultado->bindParam(':idproducto',    $idproducto);
-//         $resultado->bindParam(':fk_id_entrada', $fk_id_entrada);
-
-//         if ($resultado->execute()) {
-//             echo json_encode("actualizado correctamente");
-//         } else {
-//             echo json_encode("no fue agregado");
-//         }
-//     } catch (PDOException $error) {
-
-//         $errores =  array(
-//             "text" => $error->getMessage()
-//         );
-
-//         return json_encode($errores);
-//     }
-
-
-// });
-
-
-
-// //DELETE PRODUCT
-
-
-// $app->delete('/api/productos/delete/id={id}', function (Request $request, Response $response) {
-
-//     $idproducto = $request->getAttribute('id');
-
-
-
-//     $sql =  "DELETE FROM inventario where idproducto = :idproducto";
-
-//     try {
-
-//         $cnx = new Conexion();
-//         $query = $cnx->Conectar();
-//         $resultado = $query->prepare($sql);
-//         $resultado->bindParam(':idproducto', $idproducto);
-
-//         if ($resultado->execute()) {
-//             echo json_encode("eliminado correctamente");
-//         } else {
-//             echo json_encode("no fue eliminado");
-//         }
-//     } catch (PDOException $error) {
-
-//         $errores =  array(
-//             "text" => $error->getMessage()
-//         );
-
-//         return json_encode($errores);
-//     }
-// });
 
 ?>
