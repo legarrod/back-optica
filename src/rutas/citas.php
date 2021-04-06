@@ -105,6 +105,23 @@ $app->get('/api/citaporpaciente/{id_paciente}', function (Request $request, Resp
     
 });
 
+//Obtener informacion de citas por paciente
+$app->get('/api/citaporcedula/{cc}', function (Request $request, Response $response) {
+
+    return try_catch_wrapper(function() use ($request){
+        //throw new Exception('malo');
+        $cc = $request->getAttribute('cc');
+        $sql =  "SELECT * FROM citas_pacientes
+        INNER JOIN pacientes
+        ON citas_pacientes.fk_id_paciente = pacientes.id
+        where cedula = $cc";
+        $dbConexion = new DBConexion(new Conexion());
+        $resultado = $dbConexion->executeQuery($sql);
+        return $resultado ?: [];
+    }, $response);
+    
+});
+
 //GET obtener todas las citas por fecha
 $app->get('/api/citas/{fecha}', function (Request $request, Response $response) {
 
