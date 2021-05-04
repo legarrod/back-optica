@@ -125,9 +125,9 @@ $app->post('/api/pacientes/nuevo', function (Request $request, Response $respons
 
 $app->put('/api/pacientes/update/', function (Request $request, Response $response) {
 
-    $ciudad = $request->getParam('ciudad');
+   $ciudad = $request->getParam('ciudad');
+    $id = $request->getParam('id');
     $nombre = $request->getParam('nombre');
-    $apellidos = $request->getParam('apellidos');
     $fecha_nacimiento = $request->getParam('fecha_nacimiento');
     $celular = $request->getParam('celular');
     $fecha_registro = $request->getParam('fecha_registro');
@@ -139,13 +139,12 @@ $app->put('/api/pacientes/update/', function (Request $request, Response $respon
      $sql = "UPDATE pacientes SET 
         ciudad = :ciudad,
         nombre = :nombre,
-        apellidos = :apellidos,
         fecha_nacimiento = :fecha_nacimiento,
         celular = :celular,
         direccion = :direccion,
         ocupacion = :ocupacion,
         cedula = :cedula,
-        foto = :foto WHERE cedula = :cedula";
+        foto = :foto WHERE id = :id";
 
 
     try {
@@ -153,9 +152,9 @@ $app->put('/api/pacientes/update/', function (Request $request, Response $respon
         $cnx = new Conexion();
         $query = $cnx->Conectar();
         $resultado = $query->prepare($sql);
+        $resultado->bindParam(':id', $id);
         $resultado->bindParam(':ciudad', $ciudad);
         $resultado->bindParam(':nombre', $nombre);
-        $resultado->bindParam(':apellidos', $apellidos);
         $resultado->bindParam(':fecha_nacimiento', $fecha_nacimiento);
         $resultado->bindParam(':celular', $celular);
         $resultado->bindParam(':direccion', $direccion);

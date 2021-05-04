@@ -46,15 +46,15 @@ $app->get('/api/facturacodigo/{id}', function (Request $request, Response $respo
 
 //Obtener informacion por numero de cedula
 
-$app->get('/api/facturacedula/{id}', function (Request $request, Response $response) {
+$app->get('/api/facturacedula/{cc}', function (Request $request, Response $response) {
     
     return try_catch_wrapper(function() use ($request){
-        $id = $request->getAttribute('id');
+        $cc = $request->getAttribute('cc');
         //throw new Exception('malo');
-        $sql =  "SELECT fac.id_factura AS id, fac.numero_factura, CONCAT(pac.nombre, ' ', pac.apellidos) AS paciente, fac.estado_factura AS estado, pac.direccion, pac.celular, fac.valor_factura AS valor_total, pac.cedula AS cedula, fac.observaciones AS observacion, fac.fechasalida AS fecha_creacion
+        $sql =  "SELECT fac.id_factura AS id, fac.numero_factura, CONCAT(pac.nombre) AS paciente, fac.estado_factura AS estado, pac.direccion, pac.celular, fac.valor_factura AS valor_total, pac.cedula AS cedula, fac.observaciones AS observacion, fac.fechasalida AS fecha_creacion
         FROM con_facturas AS fac
         INNER JOIN pacientes AS pac ON pac.id = fac.cc_usuario
-        WHERE pac.cedula = '{$id}'";
+        WHERE pac.cedula = '{$cc}'";
         $dbConexion = new DBConexion(new Conexion());
         $resultado = $dbConexion->executeQuery($sql);
         return $resultado ?: [];
@@ -105,7 +105,7 @@ $app->get('/api/facturacompleta', function (Request $request, Response $response
     return try_catch_wrapper(function() {
         
         //throw new Exception('malo');
-        $sql = "SELECT fac.id_factura AS id, pac.cedula AS cedula, fac.numero_factura, fac.estado_factura AS estado, CONCAT(pac.nombre, ' ', pac.apellidos) AS paciente,
+        $sql = "SELECT fac.id_factura AS id, pac.cedula AS cedula, fac.numero_factura, fac.estado_factura AS estado, pac.nombre AS paciente,
         fac.estado_factura AS estado, fac.valor_factura, (SELECT SUM(valor_abono) FROM abonos WHERE fac.id_factura = fk_id_factura) AS total_abonos,
         fac.valor_factura - (SELECT SUM(valor_abono) FROM abonos WHERE fac.id_factura = fk_id_factura) AS total_deuda, fac.observaciones AS nota
         FROM con_facturas AS fac
@@ -163,6 +163,27 @@ $app->post('/api/facturas/creardetallefactura', function (Request $request, Resp
         //throw new Exception('malo');
         $sql =  "INSERT INTO con_detalle_factura (id_factura, id_producto, cantidad, valor_producto) 
                 VALUES (:id_factura, :id_producto, :cantidad, :valor_producto)";
+        $dbConexion = new DBConexion(new Conexion());
+        $params = $request->getParams(); 
+       
+        $resultado = $dbConexion->executePrepare($sql, $params);
+        return $resultado ?: [];
+    }, $response);
+});
+
+$app->put('/api/facturas/actualizarestado/', function (Request $request, Response $response) {
+   
+    //print_r($request->getParams()); die();
+    
+   
+ 
+    
+    
+    return try_catch_wrapper(function() use ($request){
+        //throw new Exception('malo');
+        
+       
+        $sql =  "UPDATE con_facturas SET estado_factura = :estado WHERE id_factura = :id_factura";
         $dbConexion = new DBConexion(new Conexion());
         $params = $request->getParams(); 
        

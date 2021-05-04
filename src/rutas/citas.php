@@ -186,10 +186,76 @@ $app->get('/api/citas/{fecha}', function (Request $request, Response $response) 
 $app->post('/api/citas/crear_cita', function (Request $request, Response $response) {
 
 
-    return try_catch_wrapper(function() use ($request){
+  return try_catch_wrapper(function() use ($request){
         //throw new Exception('malo');
-        $sql =  $sql = "INSERT INTO citas_pacientes (id_cita_paciente, fk_id_paciente, nombre_doctor, fk_id_sede, fk_id_estado, fecha_creacion, fecha_cita, hora, anamnesis, biomicrodcopia, od_rx_uso, oi_rx_uso, oi_ap, oi_af, od_ap, od_af, od_avvlsc, od_avvpsc, od_avccvt, od_avccvp, od_refraccion, od_rx_final, oi_avvlsc, oi_avvpsc, oi_avccvt, oi_avccvp, oi_refraccion, oi_rx_final, valor_cita, observaciones) VALUES 
-        (NULL,:fk_id_paciente,:nombre_doctor,:fk_id_sede,:fk_id_estado,:fecha_creacion,:fecha_cita, :hora, :anamnesis,:biomicrodcopia,:od_rx_uso,:oi_rx_uso,:oi_ap,:oi_af,:od_ap,:od_af,:od_avvlsc,:od_avvpsc,:od_avccvt,:od_avccvp,:od_refraccion,:od_rx_final,:oi_avvlsc,:oi_avvpsc,:oi_avccvt,:oi_avccvp,:oi_refraccion,:oi_rx_final,:valor_cita,:observaciones)";
+        $sql =  "INSERT INTO citas_pacientes (id_cita_paciente, 
+                                                    fk_id_paciente, 
+                                                    nombre_doctor, 
+                                                    fk_id_sede, 
+                                                    fk_id_estado, 
+                                                    fecha_creacion, 
+                                                    fecha_cita, 
+                                                    hora, 
+                                                    actual_av_derecho, 
+                                                    actual_av_izquierdo, 
+                                                    actual_cilindro_derecho, 
+                                                    actual_cilindro_izquierdo, 
+                                                    actual_eje_derecho, 
+                                                    actual_eje_izquierdo, 
+                                                    actual_esferico_derecho, 
+                                                    actual_esferico_izquierdo, 
+                                                    cerca_av_derecho, 
+                                                    cerca_av_izquierdo, 
+                                                    cerca_cilindro_derecho, 
+                                                    cerca_cilindro_izquierdo, 
+                                                    cerca_eje_derecho, 
+                                                    cerca_eje_izquierdo, 
+                                                    cerca_esferico_derecho, 
+                                                    cerca_esferico_izquierdo, 
+                                                    lejos_av_derecho, 
+                                                    lejos_av_izquierdo, 
+                                                    lejos_cilindro_derecho, 
+                                                    lejos_cilindro_izquierdo, 
+                                                    lejos_eje_derecho, 
+                                                    lejos_eje_izquierdo, 
+                                                    lejos_esferico_derecho, 
+                                                    lejos_esferico_izquierdo, 
+                                                    valor_cita, 
+                                                    observaciones) VALUES 
+                                                    (NULL,
+                                                    :fk_id_paciente,
+                                                    :nombre_doctor,
+                                                    :fk_id_sede,
+                                                    :fk_id_estado,
+                                                    :fecha_creacion,
+                                                    :fecha_cita, 
+                                                    :hora, 
+                                                    :actual_av_derecho,
+                                                    :actual_av_izquierdo,
+                                                    :actual_cilindro_derecho,
+                                                    :actual_cilindro_izquierdo,
+                                                    :actual_eje_derecho,
+                                                    :actual_eje_izquierdo,
+                                                    :actual_esferico_derecho,
+                                                    :actual_esferico_izquierdo,
+                                                    :cerca_av_derecho,
+                                                    :cerca_av_izquierdo,
+                                                    :cerca_cilindro_derecho,
+                                                    :cerca_cilindro_izquierdo,
+                                                    :cerca_eje_derecho,
+                                                    :cerca_eje_izquierdo,
+                                                    :cerca_esferico_derecho,
+                                                    :cerca_esferico_izquierdo,
+                                                    :lejos_av_derecho,
+                                                    :lejos_av_izquierdo,
+                                                    :lejos_cilindro_derecho,
+                                                    :lejos_cilindro_izquierdo, 
+                                                    :lejos_eje_derecho, 
+                                                    :lejos_eje_izquierdo, 
+                                                    :lejos_esferico_derecho, 
+                                                    :lejos_esferico_izquierdo, 
+                                                    :valor_cita,
+                                                    :observaciones)";
         $dbConexion = new DBConexion(new Conexion());
        $params = $request->getParams(); 
        
@@ -199,86 +265,7 @@ $app->post('/api/citas/crear_cita', function (Request $request, Response $respon
 
 
 
-    // $fk_id_paciente = $request->getParam('fk_id_paciente');
-    // $nombre_doctor = $request->getParam('nombre_doctor');
-    // $fk_id_sede = $request->getParam('fk_id_sede');//no debe estar nulo
-    // $fk_id_estado = $request->getParam('fk_id_estado');
-    // $fecha_creacion = $request->getParam('fecha_creacion');
-    // $fecha_cita = $request->getParam('fecha_cita');
-    // $anamnesis = $request->getParam('anamnesis');
-    // $biomicrodcopia = $request->getParam('biomicrodcopia');
-    // $od_rx_uso = $request->getParam('od_rx_uso');
-    // $oi_rx_uso = $request->getParam('oi_rx_uso');
-    // $oi_ap = $request->getParam('oi_ap');
-    // $oi_af = $request->getParam('oi_af');
-    // $od_ap = $request->getParam('od_ap');
-    // $od_af = $request->getParam('od_af');
-    // $od_avvlsc = $request->getParam('od_avvlsc');
-    // $od_avvpsc = $request->getParam('od_avvpsc');
-    // $od_avccvt = $request->getParam('od_avccvt');
-    // $od_avccvp = $request->getParam('od_avccvp');
-    // $od_refraccion = $request->getParam('od_refraccion');
-    // $od_rx_final = $request->getParam('od_rx_final');
-    // $oi_avvlsc = $request->getParam('oi_avvlsc');
-    // $oi_avvpsc = $request->getParam('oi_avvpsc');
-    // $oi_avccvt = $request->getParam('oi_avccvt');
-    // $oi_avccvp = $request->getParam('oi_avccvp');
-    // $oi_refraccion = $request->getParam('oi_refraccion');
-    // $oi_rx_final = $request->getParam('oi_rx_final');
-    // $valor_cita = $request->getParam('valor_cita');
-    // $observaciones = $request->getParam('observaciones');
 
-    //  $sql = "INSERT INTO citas_pacientes (id_cita_paciente, fk_id_paciente, nombre_doctor, fk_id_sede, fk_id_estado, fecha_creacion, fecha_cita, anamnesis, biomicrodcopia, od_rx_uso, oi_rx_uso, oi_ap, oi_af, od_ap, od_af, od_avvlsc, od_avvpsc, od_avccvt, od_avccvp, od_refraccion, od_rx_final, oi_avvlsc, oi_avvpsc, oi_avccvt, oi_avccvp, oi_refraccion, oi_rx_final, valor_cita, observaciones) VALUES 
-    //         (NULL,:fk_id_paciente,:nombre_doctor,:fk_id_sede,:fk_id_estado,:fecha_creacion,:fecha_cita,:anamnesis,:biomicrodcopia,:od_rx_uso,:oi_rx_uso,:oi_ap,:oi_af,:od_ap,:od_af,:od_avvlsc,:od_avvpsc,:od_avccvt,:od_avccvp,:od_refraccion,:od_rx_final,:oi_avvlsc,:oi_avvpsc,:oi_avccvt,:oi_avccvp,:oi_refraccion,:oi_rx_final,:valor_cita,:observaciones)";
-
-    // try {
-
-    //     $cnx = new Conexion();
-    //     $query = $cnx->Conectar();
-    //     $resultado = $query->prepare($sql);
-    //     $resultado->bindParam(':fk_id_paciente', $fk_id_paciente);
-    //     $resultado->bindParam(':nombre_doctor', $nombre_doctor);
-    //     $resultado->bindParam(':fk_id_sede', $fk_id_sede);
-    //     $resultado->bindParam(':fk_id_estado', $fk_id_estado);
-    //     $resultado->bindParam(':fecha_creacion', $fecha_creacion);
-    //     $resultado->bindParam(':fecha_cita', $fecha_cita);
-    //     $resultado->bindParam(':anamnesis', $anamnesis);
-    //     $resultado->bindParam(':biomicrodcopia', $biomicrodcopia);
-    //     $resultado->bindParam(':od_rx_uso', $od_rx_uso);
-    //     $resultado->bindParam(':oi_rx_uso', $oi_rx_uso);
-    //     $resultado->bindParam(':oi_ap', $oi_ap);
-    //     $resultado->bindParam(':oi_af', $oi_af);
-    //     $resultado->bindParam(':od_ap', $od_ap);
-    //     $resultado->bindParam(':od_af', $od_af);
-    //     $resultado->bindParam(':od_avvlsc', $od_avvlsc);
-    //     $resultado->bindParam(':od_avvpsc', $od_avvpsc);
-    //     $resultado->bindParam(':od_avccvt', $od_avccvt);
-    //     $resultado->bindParam(':od_avccvp', $od_avccvp);
-    //     $resultado->bindParam(':od_refraccion', $od_refraccion);
-    //     $resultado->bindParam(':od_rx_final', $od_rx_final);
-    //     $resultado->bindParam(':oi_avvlsc', $oi_avvlsc);
-    //     $resultado->bindParam(':oi_avvpsc', $oi_avvpsc);
-    //     $resultado->bindParam(':oi_avccvt', $oi_avccvt);
-    //     $resultado->bindParam(':oi_avccvp', $oi_avccvp);
-    //     $resultado->bindParam(':oi_refraccion', $oi_refraccion);
-    //     $resultado->bindParam(':oi_rx_final', $oi_rx_final);
-    //     $resultado->bindParam(':valor_cita', $valor_cita);
-    //     $resultado->bindParam(':observaciones', $observaciones);
-        
-
-    //     if ($resultado->execute()) {
-    //         echo json_encode("Paciente agregado correctamente");
-    //     } else {
-    //         echo json_encode("Hubo un error intenta de nuevo");
-    //     }
-    // } catch (PDOException $error) {
-
-    //     $errores =  array(
-    //         "text" => $error->getMessage()
-    //     );
-
-    //     return json_encode($errores);
-    // }
 });
 
 //PUT PARA ACTUALIZAR UN REGISTRO
@@ -298,148 +285,48 @@ $app->post('/api/citas/crear_cita', function (Request $request, Response $respon
 
 $app->put('/api/citas/update/', function (Request $request, Response $response) {
 
-    $id_cita_paciente = $request->getParam('id_cita_paciente');
-    $fk_id_paciente = $request->getParam('fk_id_paciente');
-    $nombre_doctor = $request->getParam('nombre_doctor');
-    $fk_id_sede = $request->getParam('fk_id_sede');//no debe estar nulo
-    $fk_id_estado = $request->getParam('fk_id_estado');
-    $fecha_creacion = $request->getParam('fecha_creacion');
-    $fecha_cita = $request->getParam('fecha_cita');
-    $anamnesis = $request->getParam('anamnesis');
-    $biomicrodcopia = $request->getParam('biomicrodcopia');
-    $od_rx_uso = $request->getParam('od_rx_uso');
-    $oi_rx_uso = $request->getParam('oi_rx_uso');
-    $oi_ap = $request->getParam('oi_ap');
-    $oi_af = $request->getParam('oi_af');
-    $od_ap = $request->getParam('od_ap');
-    $od_af = $request->getParam('od_af');
-    $od_avvlsc = $request->getParam('od_avvlsc');
-    $od_avvpsc = $request->getParam('od_avvpsc');
-    $od_avccvt = $request->getParam('od_avccvt');
-    $od_avccvp = $request->getParam('od_avccvp');
-    $od_refraccion = $request->getParam('od_refraccion');
-    $od_rx_final = $request->getParam('od_rx_final');
-    $oi_avvlsc = $request->getParam('oi_avvlsc');
-    $oi_avvpsc = $request->getParam('oi_avvpsc');
-    $oi_avccvt = $request->getParam('oi_avccvt');
-    $oi_avccvp = $request->getParam('oi_avccvp');
-    $oi_refraccion = $request->getParam('oi_refraccion');
-    $oi_rx_final = $request->getParam('oi_rx_final');
-    $valor_cita = $request->getParam('valor_cita');
-    $observaciones = $request->getParam('observaciones');
-   
-
-   $sql_prueba = "UPDATE `citas_pacientes` SET 
-    `fk_id_paciente`    = :fk_id_paciente,
-    `nombre_doctor`     = :nombre_doctor,
-    `fk_id_sede`        = :fk_id_sede,
-    `fk_id_estado`      = :fk_id_estado,
-    `fecha_creacion`    = :fecha_creacion,
-    `fecha_cita`        = :fecha_cita,
-    `anamnesis`         = :anamnesis,
-    `biomicrodcopia`    = :biomicrodcopia,
-    `od_rx_uso`         = :od_rx_uso,
-    `oi_rx_uso`         = :oi_rx_uso,
-    `oi_ap`             = :oi_ap,
-    `oi_af`             = :oi_af,
-    `od_ap`             = :od_ap,
-    `od_af`             = :od_af,
-    `od_avvlsc`         = :od_avvlsc,
-    `od_avvpsc`         = :od_avvpsc,
-    `od_avccvt`         = :od_avccvt,
-    `od_avccvp`         = :od_avccvp,
-    `od_refraccion`     = :od_refraccion,
-    `od_rx_final`       = :od_rx_final,
-    `oi_avvlsc`         = :oi_avvlsc,
-    `oi_avvpsc`         = :oi_avvpsc,
-    `oi_avccvt`         = :oi_avccvt,
-    `oi_avccvp`         = :oi_avccvp,
-    `oi_refraccion`     = :oi_refraccion,
-    `oi_rx_final`       = :oi_rx_final,
-    `valor_cita`        = :valor_cita,
-    `observaciones`        = :observaciones
-    WHERE id_cita_paciente = :id_cita_paciente";
-
-    try {
-        $cnx = new Conexion();
-        $query = $cnx->Conectar();
-        $resultado = $query->prepare($sql_prueba);
-        $resultado->bindParam(':fk_id_paciente', $fk_id_paciente);
-        $resultado->bindParam(':nombre_doctor', $nombre_doctor);
-        $resultado->bindParam(':fk_id_sede', $fk_id_sede);
-        $resultado->bindParam(':id_cita_paciente', $id_cita_paciente);
-        $resultado->bindParam(':fk_id_estado', $fk_id_estado);
-        $resultado->bindParam(':fecha_creacion', $fecha_creacion);
-        $resultado->bindParam(':fecha_cita', $fecha_cita);
-        $resultado->bindParam(':anamnesis', $anamnesis);
-        $resultado->bindParam(':biomicrodcopia', $biomicrodcopia);
-        $resultado->bindParam(':od_rx_uso', $od_rx_uso);
-        $resultado->bindParam(':oi_rx_uso', $oi_rx_uso);
-        $resultado->bindParam(':oi_ap', $oi_ap);
-        $resultado->bindParam(':oi_af', $oi_af);
-        $resultado->bindParam(':od_ap', $od_ap);
-        $resultado->bindParam(':od_af', $od_af);
-        $resultado->bindParam(':od_avvlsc', $od_avvlsc);
-        $resultado->bindParam(':od_avvpsc', $od_avvpsc);
-        $resultado->bindParam(':od_avccvt', $od_avccvt);
-        $resultado->bindParam(':od_avccvp', $od_avccvp);
-        $resultado->bindParam(':od_refraccion', $od_refraccion);
-        $resultado->bindParam(':od_rx_final', $od_rx_final);
-        $resultado->bindParam(':oi_avvlsc', $oi_avvlsc);
-        $resultado->bindParam(':oi_avvpsc', $oi_avvpsc);
-        $resultado->bindParam(':oi_avccvt', $oi_avccvt);
-        $resultado->bindParam(':oi_avccvp', $oi_avccvp);
-        $resultado->bindParam(':oi_refraccion', $oi_refraccion);
-        $resultado->bindParam(':oi_rx_final', $oi_rx_final);
-        $resultado->bindParam(':valor_cita', $valor_cita);
-        $resultado->bindParam(':observaciones', $observaciones);
-        
-        if ($resultado->execute()) {
-            echo json_encode("Cita actualizada correctamente");
-        } else {
-            echo json_encode("Hubo un error en la actualizacion intenta de nuevo");
-        }
-
-
-    } catch (PDOException $error) {
-
-        $errores =  array(
-            "text" => $error->getMessage()
-        );
-        $miArray = array($id_cita_paciente, $nombre_doctor, $fk_id_sede, $fk_id_paciente);
-        return json_encode($errores);
-    }
-    
-});
-
-$app->delete('/api/pacientes/delete/{cedula}', function (Request $request, Response $response) {
-
-    $cedula = $request->getAttribute('cedula');
-
-
-
-    $sql =  "DELETE FROM pacientes where cedula = :cedula";
-
-    try {
-
-        $cnx = new Conexion();
-        $query = $cnx->Conectar();
-        $resultado = $query->prepare($sql);
-        $resultado->bindParam(':cedula', $cedula);
-
-        if ($resultado->execute()) {
-            echo json_encode("Paciente eliminado correctamente");
-        } else {
-            echo json_encode("Hubo un error paciente no eliminado intenta de nuevo");
-        }
-    } catch (PDOException $error) {
-
-        $errores =  array(
-            "text" => $error->getMessage()
-        );
-
-        return json_encode($errores);
-    }
+   return try_catch_wrapper(function() use ($request){
+        //throw new Exception('malo');
+        $sql =  "UPDATE `citas_pacientes` SET 
+        `fk_id_paciente`            = :fk_id_paciente,
+        `nombre_doctor`             = :nombre_doctor,
+        `fk_id_sede`                = :fk_id_sede,
+        `fk_id_estado`              = :fk_id_estado,
+        `fecha_creacion`            = :fecha_creacion,
+        `fecha_cita`                = :fecha_cita,
+        `actual_av_derecho`         = :actual_av_derecho,
+        `actual_av_izquierdo`       = :actual_av_izquierdo,
+        `actual_cilindro_derecho`   = :actual_cilindro_derecho,
+        `actual_cilindro_izquierdo` = :actual_cilindro_izquierdo,
+        `actual_eje_derecho`        = :actual_eje_derecho,
+        `actual_eje_izquierdo`      = :actual_eje_izquierdo,
+        `actual_esferico_derecho`   = :actual_esferico_derecho,
+        `actual_esferico_izquierdo` = :actual_esferico_izquierdo,
+        `cerca_av_derecho`          = :cerca_av_derecho,
+        `cerca_av_izquierdo`        = :cerca_av_izquierdo,
+        `cerca_cilindro_derecho`    = :cerca_cilindro_derecho,
+        `cerca_cilindro_izquierdo`  = :cerca_cilindro_izquierdo,
+        `cerca_eje_derecho:`        = :cerca_eje_derecho,
+        `cerca_eje_izquierdo`       = :cerca_eje_izquierdo,
+        `cerca_esferico_derecho`    = :cerca_esferico_derecho,
+        `cerca_esferico_izquierdo`  = :cerca_esferico_izquierdo,
+        `lejos_av_derecho`          = :lejos_av_derecho,
+        `lejos_av_izquierdo`        = :lejos_av_izquierdo,
+        `lejos_cilindro_derecho`    = :lejos_cilindro_derecho,
+        `lejos_cilindro_izquierdo`  = :lejos_cilindro_izquierdo,
+        `lejos_eje_derecho`         = :lejos_eje_derecho,
+        `lejos_eje_izquierdo`       = :lejos_eje_izquierdo,
+        `lejos_esferico_derecho`    = :lejos_esferico_derecho,
+        `lejos_esferico_izquierdo`  = :lejos_esferico_izquierdo,
+        `valor_cita`                = :valor_cita,
+        `observaciones`             = :observaciones
+        WHERE id_cita_paciente      = :id_cita_paciente";
+        $dbConexion = new DBConexion(new Conexion());
+       $params = $request->getParams(); 
+       
+        $resultado = $dbConexion->executePrepare($sql, $params);
+        return $resultado ?: [];
+    }, $response);
 });
 
 ?>
