@@ -104,7 +104,7 @@ $app->post('/api/crearusuario', function (Request $request, Response $response) 
 $app->post('/api/usuariologin', function (Request $request, Response $response) {
    
     //print_r($request->getParams()); die();
-    // DELETE FROM `con_facturas` WHERE `con_facturas`.`id_factura` = 220
+
     
     $usuario  = $request->getParam('usuario');
     $contrasena = $request->getParam('contrasena');

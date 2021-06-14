@@ -35,7 +35,7 @@ $app->get('/api/citasestado/{id_estado}', function (Request $request, Response $
     return try_catch_wrapper(function() use ($request){
         //throw new Exception('malo');
         $id_estado = $request->getAttribute('id_estado');
-        $sql =  "SELECT citas_pacientes.id_cita_paciente, citas_pacientes.fecha_creacion, citas_pacientes.fecha_cita, citas_pacientes.hora, pacientes.nombre, pacientes.apellidos FROM citas_pacientes
+        $sql =  "SELECT citas_pacientes.id_cita_paciente, citas_pacientes.fecha_creacion, citas_pacientes.fecha_cita, citas_pacientes.hora, pacientes.nombre, pacientes.apellidos, citas_pacientes.fk_id_paciente FROM citas_pacientes
         INNER JOIN pacientes
         ON citas_pacientes.fk_id_paciente = pacientes.id
         where fk_id_estado = $id_estado
@@ -65,10 +65,26 @@ $app->get('/api/citasporfecha/{fecha}', function (Request $request, Response $re
     
 });
 
+//obtener horas de las citas por fecha
+
+$app->get('/api/horascitasporfecha/{fecha}', function (Request $request, Response $response) {
+
+    return try_catch_wrapper(function() use ($request){
+        //throw new Exception('malo');
+        $fecha = $request->getAttribute('fecha');
+        $sql =  "SELECT hora FROM citas_pacientes
+        where fecha_cita = '{$fecha}'";
+        $dbConexion = new DBConexion(new Conexion());
+        $resultado = $dbConexion->executeQuery($sql);
+        return $resultado ?: [];
+    }, $response);
+    
+});
+
 //Obtener resumen de citas para cards de citas inicial 
 $app->get('/api/citas_cards', function (Request $request, Response $response) {
 
-    $sql1 =  "SELECT citas_pacientes.id_cita_paciente, citas_pacientes.fecha_creacion, citas_pacientes.fecha_cita, pacientes.nombre, pacientes.apellidos FROM citas_pacientes
+    $sql1 =  "SELECT citas_pacientes.id_cita_paciente, citas_pacientes.fecha_creacion, citas_pacientes.fecha_cita, pacientes.nombre, pacientes.apellidos, citas_pacientes.fk_id_paciente FROM citas_pacientes
     INNER JOIN pacientes
     ON citas_pacientes.fk_id_paciente = pacientes.id";
 
@@ -196,14 +212,10 @@ $app->post('/api/citas/crear_cita', function (Request $request, Response $respon
                                                     fecha_creacion, 
                                                     fecha_cita, 
                                                     hora, 
-                                                    actual_av_derecho, 
-                                                    actual_av_izquierdo, 
-                                                    actual_cilindro_derecho, 
-                                                    actual_cilindro_izquierdo, 
-                                                    actual_eje_derecho, 
-                                                    actual_eje_izquierdo, 
-                                                    actual_esferico_derecho, 
-                                                    actual_esferico_izquierdo, 
+                                                    lejos_add_derecho, 
+                                                    lejos_add_izquierdo, 
+                                                    cerca_add_derecho, 
+                                                    cerca_add_izquierdo,
                                                     cerca_av_derecho, 
                                                     cerca_av_izquierdo, 
                                                     cerca_cilindro_derecho, 
@@ -230,14 +242,10 @@ $app->post('/api/citas/crear_cita', function (Request $request, Response $respon
                                                     :fecha_creacion,
                                                     :fecha_cita, 
                                                     :hora, 
-                                                    :actual_av_derecho,
-                                                    :actual_av_izquierdo,
-                                                    :actual_cilindro_derecho,
-                                                    :actual_cilindro_izquierdo,
-                                                    :actual_eje_derecho,
-                                                    :actual_eje_izquierdo,
-                                                    :actual_esferico_derecho,
-                                                    :actual_esferico_izquierdo,
+                                                    :lejos_add_derecho, 
+                                                    :lejos_add_izquierdo, 
+                                                    :cerca_add_derecho, 
+                                                    :cerca_add_izquierdo,
                                                     :cerca_av_derecho,
                                                     :cerca_av_izquierdo,
                                                     :cerca_cilindro_derecho,
@@ -294,19 +302,15 @@ $app->put('/api/citas/update/', function (Request $request, Response $response) 
         `fk_id_estado`              = :fk_id_estado,
         `fecha_creacion`            = :fecha_creacion,
         `fecha_cita`                = :fecha_cita,
-        `actual_av_derecho`         = :actual_av_derecho,
-        `actual_av_izquierdo`       = :actual_av_izquierdo,
-        `actual_cilindro_derecho`   = :actual_cilindro_derecho,
-        `actual_cilindro_izquierdo` = :actual_cilindro_izquierdo,
-        `actual_eje_derecho`        = :actual_eje_derecho,
-        `actual_eje_izquierdo`      = :actual_eje_izquierdo,
-        `actual_esferico_derecho`   = :actual_esferico_derecho,
-        `actual_esferico_izquierdo` = :actual_esferico_izquierdo,
+        `lejos_add_derecho`         = :lejos_add_derecho,
+        `lejos_add_izquierdo`       = :lejos_add_izquierdo,
+        `cerca_add_derecho`         = :cerca_add_derecho,
+        `cerca_add_izquierdo`       = :cerca_add_izquierdo,
         `cerca_av_derecho`          = :cerca_av_derecho,
         `cerca_av_izquierdo`        = :cerca_av_izquierdo,
         `cerca_cilindro_derecho`    = :cerca_cilindro_derecho,
         `cerca_cilindro_izquierdo`  = :cerca_cilindro_izquierdo,
-        `cerca_eje_derecho:`        = :cerca_eje_derecho,
+        `cerca_eje_derecho`        = :cerca_eje_derecho,
         `cerca_eje_izquierdo`       = :cerca_eje_izquierdo,
         `cerca_esferico_derecho`    = :cerca_esferico_derecho,
         `cerca_esferico_izquierdo`  = :cerca_esferico_izquierdo,
@@ -320,6 +324,22 @@ $app->put('/api/citas/update/', function (Request $request, Response $response) 
         `lejos_esferico_izquierdo`  = :lejos_esferico_izquierdo,
         `valor_cita`                = :valor_cita,
         `observaciones`             = :observaciones
+        WHERE id_cita_paciente      = :id_cita_paciente";
+        $dbConexion = new DBConexion(new Conexion());
+       $params = $request->getParams(); 
+       
+        $resultado = $dbConexion->executePrepare($sql, $params);
+        return $resultado ?: [];
+    }, $response);
+});
+
+$app->put('/api/horacita/update/', function (Request $request, Response $response) {
+
+   return try_catch_wrapper(function() use ($request){
+        //throw new Exception('malo');
+        $sql =  "UPDATE `citas_pacientes` SET 
+        `hora`            = :hora,
+        `id_cita_paciente`= :id_cita_paciente
         WHERE id_cita_paciente      = :id_cita_paciente";
         $dbConexion = new DBConexion(new Conexion());
        $params = $request->getParams(); 

@@ -10,7 +10,7 @@ $app->get('/api/pacientes', function (Request $request, Response $response) {
 
     return try_catch_wrapper(function() use ($request){
         //throw new Exception('malo');
-        $sql =  "SELECT * FROM pacientes INNER JOIN ciudades ON pacientes.ciudad = ciudades.id_ciudad";
+        $sql =  "SELECT * FROM pacientes INNER JOIN ciudades ON pacientes.ciudad = ciudades.id_ciudad ORDER BY nombre ASC";
         $dbConexion = new DBConexion(new Conexion());
         $resultado = $dbConexion->executeQuery($sql);
         return $resultado ?: [];
@@ -21,7 +21,7 @@ $app->get('/api/pacientes', function (Request $request, Response $response) {
 $app->get('/api/pacientes/{id}', function (Request $request, Response $response) {
 
     $id = $request->getAttribute('id');
-    $sql =  "SELECT * FROM pacientes where cedula = '$id' ";
+    $sql =  "SELECT * FROM pacientes where cedula LIKE '%{$id}%' ";
 
     try {
 
@@ -42,6 +42,20 @@ $app->get('/api/pacientes/{id}', function (Request $request, Response $response)
 
         return json_encode($errores);
     }
+});
+
+$app->get('/api/pacientesList/{cc}', function (Request $request, Response $response) {
+    
+    return try_catch_wrapper(function() use ($request){
+        $cc = $request->getAttribute('cc');
+        //throw new Exception('malo');
+       $sql =  "SELECT * FROM pacientes where cedula LIKE '%{$cc}%' OR nombre LIKE '%{$cc}%'";
+        $dbConexion = new DBConexion(new Conexion());
+        $resultado = $dbConexion->executeQuery($sql);
+        return $resultado ?: [];
+    }, $response);
+
+  
 });
 
 //POST CREAR UN NUEVO PACIENTE

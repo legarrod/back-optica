@@ -8,9 +8,9 @@ header("Allow: GET, POST, OPTIONS, PUT, DELETE");
 class Conexion
 {
 
-    private $host = "151.106.96.201";
-    private $user = "u805390524_admin";
-    private $pw = "vWPP3b[gfu6@";
+    private $host = "localhost";
+    private $user = "root";
+    private $pw = "";
     private $db  = "u805390524_optica";
 
     public function Conectar()

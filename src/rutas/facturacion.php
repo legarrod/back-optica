@@ -24,7 +24,7 @@ $app->get('/api/abonosfactura/{id}', function (Request $request, Response $respo
     return try_catch_wrapper(function() use ($request){
         $id = $request->getAttribute('id');
         //throw new Exception('malo');
-        $sql =  "SELECT fk_id_factura AS 'numero_factura', valor_abono AS 'valor', fecha_abono AS 'fecha', usuario_registro_abono AS 'usuario', nota_abono AS 'nota' FROM abonos WHERE fk_id_factura = $id";
+        $sql =  "SELECT id_abono AS 'id', fk_id_factura AS 'numero_factura', valor_abono AS 'valor', fecha_abono AS 'fecha', usuario_registro_abono AS 'usuario', nota_abono AS 'nota' FROM abonos WHERE fk_id_factura = $id";
         $dbConexion = new DBConexion(new Conexion());
         $resultado = $dbConexion->executeQuery($sql);
         return $resultado ?: [];
@@ -51,10 +51,10 @@ $app->get('/api/facturacedula/{cc}', function (Request $request, Response $respo
     return try_catch_wrapper(function() use ($request){
         $cc = $request->getAttribute('cc');
         //throw new Exception('malo');
-        $sql =  "SELECT fac.id_factura AS id, fac.numero_factura, CONCAT(pac.nombre) AS paciente, fac.estado_factura AS estado, pac.direccion, pac.celular, fac.valor_factura AS valor_total, pac.cedula AS cedula, fac.observaciones AS observacion, fac.fechasalida AS fecha_creacion
+        $sql =  "SELECT fac.id_factura AS id, fac.numero_factura, CONCAT(pac.nombre) AS paciente, fac.estado_factura AS estado, pac.direccion, pac.celular, fac.valor_factura AS valor_factura, pac.cedula AS cedula, fac.observaciones AS observacion, fac.fechasalida AS fecha_creacion, (SELECT SUM(valor_abono) FROM abonos WHERE fac.id_factura = fk_id_factura) AS total_abonos,  fac.valor_factura - (SELECT SUM(valor_abono) FROM abonos WHERE fac.id_factura = fk_id_factura) AS total_deuda
         FROM con_facturas AS fac
         INNER JOIN pacientes AS pac ON pac.id = fac.cc_usuario
-        WHERE pac.cedula = '{$cc}'";
+        WHERE pac.cedula LIKE '%{$cc}%' OR pac.nombre LIKE '%{$cc}%'";
         $dbConexion = new DBConexion(new Conexion());
         $resultado = $dbConexion->executeQuery($sql);
         return $resultado ?: [];
@@ -93,6 +93,25 @@ $app->get('/api/exportar', function (Request $request, Response $response) {
         LEFT JOIN con_detalle_factura AS det ON fac.id_factura = det.id_factura
         LEFT JOIN inventario AS inv ON det.id_producto = inv.idproducto
         ";
+        $dbConexion = new DBConexion(new Conexion());
+        $resultado = $dbConexion->executeQuery($sql);
+        return $resultado ?: [];
+    }, $response);
+});
+
+//exportar inventario
+$app->get('/api/exportar-inventario', function (Request $request, Response $response) {
+    
+    return try_catch_wrapper(function() use ($request){
+        //throw new Exception('malo');
+        $sql =  "SELECT fk_id_producto AS codigo, inv.nombre, inv.descripcion, SUM(stock) AS cantidad
+        FROM
+          (SELECT fk_id_producto, SUM(cantidad) AS stock FROM detalle_entrada GROUP BY fk_id_producto
+            UNION ALL
+           SELECT fk_id_producto, -SUM(cantidad) AS stock FROM detalle_salida GROUP BY fk_id_producto
+          ) as subquery
+        INNER JOIN inventario AS inv ON inv.codigo = subquery.fk_id_producto
+        GROUP BY fk_id_producto";
         $dbConexion = new DBConexion(new Conexion());
         $resultado = $dbConexion->executeQuery($sql);
         return $resultado ?: [];
@@ -157,16 +176,14 @@ $app->post('/api/facturas/crearabono', function (Request $request, Response $res
 //Con este enpoint vamos a crear el detalle de la factura
 $app->post('/api/facturas/creardetallefactura', function (Request $request, Response $response) {
    
-    //print_r($request->getParams()); die();
-
     return try_catch_wrapper(function() use ($request){
-        //throw new Exception('malo');
-        $sql =  "INSERT INTO con_detalle_factura (id_factura, id_producto, cantidad, valor_producto) 
-                VALUES (:id_factura, :id_producto, :cantidad, :valor_producto)";
-        $dbConexion = new DBConexion(new Conexion());
-        $params = $request->getParams(); 
-       
-        $resultado = $dbConexion->executePrepare($sql, $params);
+        $params = $request->getParams();
+        foreach ($params as $key => $value) {
+            $sql =  "INSERT INTO con_detalle_factura (id_factura, id_producto, cantidad, valor_producto) 
+            VALUES (:id_factura, :id_producto, :cantidad, :valor_producto)";
+             $dbConexion = new DBConexion(new Conexion());
+             $resultado = $dbConexion->executePrepare($sql, $value);    
+          } 
         return $resultado ?: [];
     }, $response);
 });
@@ -192,6 +209,63 @@ $app->put('/api/facturas/actualizarestado/', function (Request $request, Respons
     }, $response);
 });
 
+$app->delete('/api/facturas/delete/{id}', function (Request $request, Response $response) {
+    
+     $id = $request->getAttribute('id');
+
+    $sql =  "DELETE FROM con_facturas WHERE id_factura = $id";
+
+    try {
+
+        $cnx = new Conexion();
+        $query = $cnx->Conectar();
+        $resultado = $query->prepare($sql);
+        $resultado->bindParam(':idproducto', $id);
+
+        if ($resultado->execute()) {
+            echo json_encode("Factura eliminada correctamente");
+        } else {
+            echo json_encode("Factura no se pudo eliminar eliminar");
+        }
+    } catch (PDOException $error) {
+
+        $errores =  array(
+            "text" => $error->getMessage()
+        );
+
+        return json_encode($errores);
+    }
+  
+});
+
+$app->delete('/api/abono/delete/{id}', function (Request $request, Response $response) {
+    
+     $id = $request->getAttribute('id');
+
+    $sql =  "DELETE FROM abonos WHERE id_abono = $id";
+
+    try {
+
+        $cnx = new Conexion();
+        $query = $cnx->Conectar();
+        $resultado = $query->prepare($sql);
+        $resultado->bindParam(':id_abono', $id);
+
+        if ($resultado->execute()) {
+            echo json_encode("Abono eliminado");
+        } else {
+            echo json_encode("Abono no se pudo eliminar");
+        }
+    } catch (PDOException $error) {
+
+        $errores =  array(
+            "text" => $error->getMessage()
+        );
+
+        return json_encode($errores);
+    }
+  
+});
 
 
 ?>
