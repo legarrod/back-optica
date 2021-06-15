@@ -47,6 +47,21 @@ $app->get('/api/citasestado/{id_estado}', function (Request $request, Response $
     
 });
 
+//Horas citas
+$app->get('/api/horascitas', function (Request $request, Response $response) {
+
+    return try_catch_wrapper(function() use ($request){
+        //throw new Exception('malo');
+        $id_estado = $request->getAttribute('id_estado');
+        $sql =  "SELECT fecha_cita, (SELECT GROUP_CONCAT(DISTINCT hora) FROM citas_pacientes ORDER BY hora ASC) AS horas 
+                    FROM citas_pacientes GROUP BY fecha_cita ORDER BY fecha_cita ASC";
+        $dbConexion = new DBConexion(new Conexion());
+        $resultado = $dbConexion->executeQuery($sql);
+        return $resultado ?: [];
+    }, $response);
+    
+});
+
 //Obtener citas por fecha
 $app->get('/api/citasporfecha/{fecha}', function (Request $request, Response $response) {
 

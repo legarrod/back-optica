@@ -18,6 +18,19 @@ $app->get('/api/facturas', function (Request $request, Response $response) {
     
 });
 
+//
+$app->get('/api/invoice-last-created', function (Request $request, Response $response) {
+
+    return try_catch_wrapper(function() use ($request){
+        //throw new Exception('malo');
+        $sql =  "SELECT MAX(id_factura) AS codigo FROM con_facturas";
+        $dbConexion = new DBConexion(new Conexion());
+        $resultado = $dbConexion->executeQuery($sql);
+        return $resultado ?: [];
+    }, $response);
+
+});
+
 //Obetener abonos por factura
 $app->get('/api/abonosfactura/{id}', function (Request $request, Response $response) {
     
@@ -146,8 +159,8 @@ $app->post('/api/facturas/crearfactura', function (Request $request, Response $r
 
     return try_catch_wrapper(function() use ($request){
         //throw new Exception('malo');
-        $sql =  "INSERT INTO con_facturas (fechasalida, valor_factura, cc_usuario, numero_factura, estado_factura, observaciones) 
-                VALUES (:fechasalida, :valor_factura, :cc_usuario, :numero_factura, :estado_factura, :observaciones)";
+        $sql =  "INSERT INTO con_facturas (id_factura, fechasalida, valor_factura, cc_usuario, numero_factura, estado_factura, observaciones) 
+                VALUES (:id_factura, :fechasalida, :valor_factura, :cc_usuario, :numero_factura, :estado_factura, :observaciones)";
         $dbConexion = new DBConexion(new Conexion());
        $params = $request->getParams(); 
        

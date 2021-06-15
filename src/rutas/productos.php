@@ -208,17 +208,13 @@ $app->put('/api/productos/update', function (Request $request, Response $respons
 
     $nombre         = $request->getParam('nombre');
     $descripcion    = $request->getParam('descripcion');
-    $imagen         = $request->getParam('imagen');
     $codigo         = $request->getParam('codigo');
-    $idproducto     = $request->getParam('idproducto');
-    $fk_id_entrada  = $request->getParam('fk_id_entrada');
+ 
 
     $sql =  "UPDATE inventario SET 
                 nombre          = :nombre,
                 descripcion     = :descripcion,
-                codigo          = :codigo,
-                fk_id_entrada   = :fk_id_entrada,
-                imagen          = :imagen WHERE idproducto = :idproducto";
+                codigo          = :codigo WHERE codigo = :codigo";
 
     try {
 
@@ -229,9 +225,6 @@ $app->put('/api/productos/update', function (Request $request, Response $respons
         $resultado->bindParam(':nombre',        $nombre);
         $resultado->bindParam(':descripcion',   $descripcion);
         $resultado->bindParam(':codigo',        $codigo);
-        $resultado->bindParam(':imagen',        $imagen);
-        $resultado->bindParam(':idproducto',    $idproducto);
-        $resultado->bindParam(':fk_id_entrada', $fk_id_entrada);
 
         if ($resultado->execute()) {
             echo json_encode("actualizado correctamente");
@@ -261,7 +254,7 @@ $app->delete('/api/productos/delete/id={id}', function (Request $request, Respon
 
 
 
-    $sql =  "DELETE FROM inventario where idproducto = :idproducto";
+    $sql =  "DELETE FROM inventario where codigo = :idproducto";
 
     try {
 
